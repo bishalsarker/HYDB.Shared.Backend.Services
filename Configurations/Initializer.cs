@@ -12,7 +12,7 @@ namespace HYDB.Services.Configurations
     {
         public static void InitializeHYDBServices(this IServiceCollection services)
         {
-            services.AddAutoMapper(typeof(UserAccountMap));
+            services.AddAutoMapper(typeof(UserAccountMap), typeof(DataModelMap));
 
             services.AddSingleton<IUserAccountInfo, UserAccountInfo>();
         }
