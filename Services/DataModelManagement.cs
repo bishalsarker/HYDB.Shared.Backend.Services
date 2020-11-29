@@ -75,7 +75,8 @@ namespace HYDB.Services.Services
                 Data = new DataModelResponse()
                 {
                     Id = newDataModel.Id,
-                    Name = newDataModel.Name
+                    Name = newDataModel.Name,
+                    Properties = new List<DataModelPropertyResponse>()
                 }
             };
         }
