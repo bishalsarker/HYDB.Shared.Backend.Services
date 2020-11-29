@@ -109,6 +109,24 @@ namespace HYDB.Services.Services
             return dataModelDtoList;
         }
 
+        public Response DeleteDataModel(string modelId)
+        {
+            var properties = _dataModelPropRepo.GetDataModelProperties(modelId);
+            foreach (var property in properties)
+            {
+                _dataModelPropRepo.DeleteDataModelProperty(property.Id);
+                // _dataObjectKeyValueRepo.DeleteByKeyString(property.Id);
+            }
+
+            _dataModelRepo.DeleteDataModel(modelId);
+
+            return new Response()
+            {
+                IsSuccess = true,
+                Message = "Data model deleted"
+            };
+        }
+
         public Response AddNewProperty(DataModelPropertyPayload newPropertyRequest)
         {
             var newDataModelProp = _mapper.Map<DataModelProperty>(newPropertyRequest);

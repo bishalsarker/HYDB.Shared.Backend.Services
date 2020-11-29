@@ -62,5 +62,14 @@ namespace HYDB.Services.Repositories
                 return conn.Query<DataModel>(sqlquery, new { @userid = userId }).FirstOrDefault();
             }
         }
+
+        public void DeleteDataModel(string modelId)
+        {
+            using (IDbConnection conn = new SqlConnection(GetConnectionString()))
+            {
+                string sqlquery = "delete from DataModels where Id=@id";
+                conn.Execute(sqlquery, new { @id = modelId });
+            }
+        }
     }
 }
