@@ -33,25 +33,19 @@ namespace HYDB.Services.Services
 
             if(userModel != null)
             {
-                DataModel newDataModel = new DataModel()
+                var matchedDataModels = _dataModelRepo.GetAllDataModelByName(newDataModelRequest.Name, userModel.Id);
+                if(matchedDataModels != null)
                 {
-                    Id = Guid.NewGuid().ToString("N").ToUpper(),
-                    Name = newDataModelRequest.Name,
-                    CreatedBy = userModel.Id
-                };
-
-                _dataModelRepo.AddNewDataModel(newDataModel);
-
-                return new Response()
-                {
-                    IsSuccess = true,
-                    Message = "Data model created successfully",
-                    Data = new DataModelResponse()
+                    return new Response()
                     {
-                        Id = newDataModel.Id,
-                        Name = newDataModel.Name
-                    }
-                };
+                        IsSuccess = false,
+                        Message = "Data model with this name already exists"
+                    };
+                }
+                else
+                {
+                    return SaveDataModelToDatabase(newDataModelRequest, userModel);
+                }
             }
             else
             {
@@ -61,6 +55,29 @@ namespace HYDB.Services.Services
                     Message = "User can't be resolved"
                 };
             }
+        }
+
+        private Response SaveDataModelToDatabase(DataModelPayload newDataModelRequest, UserAccount userModel)
+        {
+            DataModel newDataModel = new DataModel()
+            {
+                Id = Guid.NewGuid().ToString("N").ToUpper(),
+                Name = newDataModelRequest.Name,
+                CreatedBy = userModel.Id
+            };
+
+            _dataModelRepo.AddNewDataModel(newDataModel);
+
+            return new Response()
+            {
+                IsSuccess = true,
+                Message = "Data model created successfully",
+                Data = new DataModelResponse()
+                {
+                    Id = newDataModel.Id,
+                    Name = newDataModel.Name
+                }
+            };
         }
 
         public DataModelResponse GetDataModel(string modelId)
@@ -97,13 +114,26 @@ namespace HYDB.Services.Services
             var newDataModelProp = _mapper.Map<DataModelProperty>(newPropertyRequest);
             newDataModelProp.Id = Guid.NewGuid().ToString("N").ToUpper();
 
-            _dataModelPropRepo.AddNewDataModelProperty(newDataModelProp);
-            return new Response()
+            var matchedProperty = _dataModelPropRepo.GetDataModelPropertyByName(newDataModelProp.Name, newDataModelProp.DataModelId);
+
+            if(matchedProperty != null)
             {
-                IsSuccess = true,
-                Data = _mapper.Map<DataModelPropertyResponse>(newDataModelProp),
-                Message = "Property created successfully"
-            };
+                return new Response()
+                {
+                    IsSuccess = false,
+                    Message = "Property with this name already exists in this data model"
+                };
+            }
+            else
+            {
+                _dataModelPropRepo.AddNewDataModelProperty(newDataModelProp);
+                return new Response()
+                {
+                    IsSuccess = true,
+                    Data = _mapper.Map<DataModelPropertyResponse>(newDataModelProp),
+                    Message = "Property created successfully"
+                };
+            }
         }
 
         public Response EditProperty(DataModelPropertyPayload updatePropertyRequest)
@@ -129,7 +159,7 @@ namespace HYDB.Services.Services
 
         public DataModelPropertyResponse GetProperty(string propertyId)
         {
-            var dataModelProperty = _dataModelPropRepo.GetDataModelProperty(propertyId);
+            var dataModelProperty = _dataModelPropRepo.GetDataModelPropertyById(propertyId);
             return _mapper.Map<DataModelPropertyResponse>(dataModelProperty);
         }
 

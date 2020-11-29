@@ -54,7 +54,7 @@ namespace HYDB.Services.Repositories
             }
         }
 
-        public DataModelProperty GetDataModelProperty(string propertyId)
+        public DataModelProperty GetDataModelPropertyById(string propertyId)
         {
             using (IDbConnection conn = new SqlConnection(GetConnectionString()))
             {
@@ -63,7 +63,7 @@ namespace HYDB.Services.Repositories
             }
         }
 
-        public DataModelProperty GetDataModelProperty(string propertyName, int dataModelId)
+        public DataModelProperty GetDataModelPropertyByName(string propertyName, string dataModelId)
         {
             using (IDbConnection conn = new SqlConnection(GetConnectionString()))
             {
