@@ -27,7 +27,20 @@ namespace HYDB.Services.Repositories
             }
         }
 
-        public DataModel GetDataModelByModelId(string modelId)
+        public void UpdateDataModel(DataModel newDataModel)
+        {
+            using (IDbConnection conn = new SqlConnection(GetConnectionString()))
+            {
+                string sqlquery = "update DataModels set Name=@name where Id=@id";
+                conn.Execute(sqlquery, new
+                {
+                    @id = newDataModel.Id,
+                    @name = newDataModel.Name
+                });
+            }
+        }
+
+        public DataModel GetDataModelById(string modelId)
         {
             using (IDbConnection conn = new SqlConnection(GetConnectionString()))
             {

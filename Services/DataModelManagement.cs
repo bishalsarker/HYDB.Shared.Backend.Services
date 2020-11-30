@@ -81,9 +81,49 @@ namespace HYDB.Services.Services
             };
         }
 
+        public Response RenameDataModel(DataModelPayload newDataModelRequest)
+        {
+            var matchedDataModels = _dataModelRepo.GetDataModelById(newDataModelRequest.Id);
+            if (matchedDataModels != null)
+            {
+                return UpdateDataModel(newDataModelRequest);
+            }
+            else
+            {
+                return new Response()
+                {
+                    IsSuccess = false,
+                    Message = "Data model doesn't exist"
+                };
+            }
+        }
+
+        private Response UpdateDataModel(DataModelPayload newDataModelRequest)
+        {
+            DataModel newDataModel = new DataModel()
+            {
+                Id = newDataModelRequest.Id,
+                Name = newDataModelRequest.Name,
+            };
+
+            _dataModelRepo.UpdateDataModel(newDataModel);
+
+            return new Response()
+            {
+                IsSuccess = true,
+                Message = "Data model updated successfully",
+                Data = new DataModelResponse()
+                {
+                    Id = newDataModel.Id,
+                    Name = newDataModel.Name,
+                    Properties = GetPropertyList(newDataModel.Id)
+                }
+            };
+        }
+
         public DataModelResponse GetDataModel(string modelId)
         {
-            var dataModel = _dataModelRepo.GetDataModelByModelId(modelId);
+            var dataModel = _dataModelRepo.GetDataModelById(modelId);
             var dataModelResponse = _mapper.Map<DataModelResponse>(dataModel);
             dataModelResponse.Properties = GetPropertyList(dataModelResponse.Id);
 
