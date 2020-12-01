@@ -15,6 +15,8 @@ namespace HYDB.Services.Configurations
             services.AddAutoMapper(typeof(UserAccountMap), typeof(DataModelMap));
 
             services.AddSingleton<IUserAccountInfo, UserAccountInfo>();
+            services.AddSingleton<IDataModelManagement, DataModelManagement>();
+            services.AddSingleton<IDataServiceManagement, DataServiceManagement>();
         }
     }
 }

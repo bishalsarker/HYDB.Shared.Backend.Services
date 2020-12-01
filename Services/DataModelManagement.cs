@@ -10,7 +10,7 @@ using System.Text;
 
 namespace HYDB.Services.Services
 {
-    public class DataModelManagement
+    public class DataModelManagement : IDataModelManagement
     {
         private readonly DataModels _dataModelRepo;
         private readonly DataModelProperties _dataModelPropRepo;
@@ -31,10 +31,10 @@ namespace HYDB.Services.Services
         {
             var userModel = _userAccountRepo.GetByUsername(userName).FirstOrDefault();
 
-            if(userModel != null)
+            if (userModel != null)
             {
                 var matchedDataModels = _dataModelRepo.GetAllDataModelByName(newDataModelRequest.Name, userModel.Id);
-                if(matchedDataModels != null)
+                if (matchedDataModels != null)
                 {
                     return new Response()
                     {
@@ -135,7 +135,7 @@ namespace HYDB.Services.Services
             var dataModelDtoList = new List<DataModelResponse>();
             var userModel = _userAccountRepo.GetByUsername(userName).FirstOrDefault();
 
-            if(userModel != null)
+            if (userModel != null)
             {
                 foreach (DataModel dataModel in _dataModelRepo.GetAllDataModelByUserId(userModel.Id))
                 {
@@ -175,7 +175,7 @@ namespace HYDB.Services.Services
 
             var matchedProperty = _dataModelPropRepo.GetDataModelPropertyByName(newDataModelProp.Name, newDataModelProp.DataModelId);
 
-            if(matchedProperty != null)
+            if (matchedProperty != null)
             {
                 return new Response()
                 {
