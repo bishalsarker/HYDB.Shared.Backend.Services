@@ -17,18 +17,20 @@ namespace HYDB.Services.Repositories
         {
             using (IDbConnection conn = new SqlConnection(GetConnectionString()))
             {
-                string sqlquery = "insert into ServiceOperations (Id, Name, Type, ServiceId) values (@id, @name, @type, @serviceid)";
+                string sqlquery = "insert into ServiceOperations (Id, Name, Type, Script, ServiceId) " +
+                                  "values (@id, @name, @type, @script, @serviceid)";
                 conn.Execute(sqlquery, new
                 {
                     @id = newServiceOperation.Id,
                     @name = newServiceOperation.Name,
                     @type = newServiceOperation.Type,
+                    @script = newServiceOperation.Script,
                     @serviceid = newServiceOperation.ServiceId
                 });
             }
         }
 
-        public ServiceOperation EditServiceOperation(ServiceOperation updateProperty)
+        public ServiceOperation EditServiceOperationInfo(ServiceOperation updateProperty)
         {
             using (IDbConnection conn = new SqlConnection(GetConnectionString()))
             {
@@ -38,8 +40,22 @@ namespace HYDB.Services.Repositories
                 {
                     @opid = updateProperty.Id,
                     @name = updateProperty.Name,
-                    @type = updateProperty.Type,
-                    @serviceid = updateProperty.ServiceId
+                    @type = updateProperty.Type
+                }
+                ).FirstOrDefault();
+            }
+        }
+
+        public ServiceOperation EditServiceOperationScript(ServiceOperation updateProperty)
+        {
+            using (IDbConnection conn = new SqlConnection(GetConnectionString()))
+            {
+                string sqlquery = "update ServiceOperations set Script=@script where Id=@opid; " +
+                                  "select * from ServiceOperations where Id=@opid";
+                return conn.Query<ServiceOperation>(sqlquery, new
+                {
+                    @opid = updateProperty.Id,
+                    @script = updateProperty.Script
                 }
                 ).FirstOrDefault();
             }

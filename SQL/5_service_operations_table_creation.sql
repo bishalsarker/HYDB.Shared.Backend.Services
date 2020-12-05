@@ -2,6 +2,7 @@ create table ServiceOperations (
 	Id varchar(900) not null primary key,
 	Name varchar(max) not null,
 	Type varchar(max) not null,
+	Script varchar(max) not null,
 	ServiceId varchar(900) foreign key references DataServices(Id)
 );
 

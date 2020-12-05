@@ -172,6 +172,7 @@ namespace HYDB.Services.Services
         {
             var newOperation = _mapper.Map<ServiceOperation>(newOperationRequest);
             newOperation.Id = Guid.NewGuid().ToString("N").ToUpper();
+            newOperation.Script = GenerateNewScript();
 
             var matchedOperation = _serviceOperationRepo.GetServiceOperationByName(newOperation.Name, newOperation.ServiceId);
 
@@ -195,10 +196,23 @@ namespace HYDB.Services.Services
             }
         }
 
+        private string GenerateNewScript()
+        {
+            var script = new StringBuilder();
+            script.Append("{");
+            script.Append(Environment.NewLine);
+            script.Append("\t");
+            script.Append("\"dataSource\": \"\"");
+            script.Append(Environment.NewLine);
+            script.Append("}");
+
+            return script.ToString();
+        }
+
         public Response EditOperation(ServiceOperationPayload updateOperationRequest)
         {
             var updatedOperation = _mapper.Map<ServiceOperation>(updateOperationRequest);
-            var newlyAddedOperation = _serviceOperationRepo.EditServiceOperation(updatedOperation);
+            var newlyAddedOperation = _serviceOperationRepo.EditServiceOperationInfo(updatedOperation);
             var response = new Response();
 
             if (newlyAddedOperation != null)
