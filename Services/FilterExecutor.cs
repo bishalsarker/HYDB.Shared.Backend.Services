@@ -6,7 +6,7 @@ using HYDB.Services.Models;
 
 namespace HYDB.Services.Services
 {
-    public class FilterExecutor
+    public static class FilterExecutor
     {
         public static bool Execute(string expression,
                                    string dataObjectId,

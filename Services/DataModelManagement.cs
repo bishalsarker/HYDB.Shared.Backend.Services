@@ -15,7 +15,7 @@ namespace HYDB.Services.Services
         private readonly DataModels _dataModelRepo;
         private readonly DataModelProperties _dataModelPropRepo;
         private readonly UserAccounts _userAccountRepo;
-        // private readonly DataObjectKeyValueRepository _dataObjectKeyValueRepo;
+        private readonly DataObjectKeyValues _dataObjectKeyValueRepo;
         private readonly IMapper _mapper;
 
         public DataModelManagement(IConfiguration config, IMapper mapper)
@@ -23,7 +23,7 @@ namespace HYDB.Services.Services
             _dataModelRepo = new DataModels(config);
             _dataModelPropRepo = new DataModelProperties(config);
             _userAccountRepo = new UserAccounts(config);
-            // _dataObjectKeyValueRepo = new DataObjectKeyValueRepository();
+            _dataObjectKeyValueRepo = new DataObjectKeyValues(config);
             _mapper = mapper;
         }
 
