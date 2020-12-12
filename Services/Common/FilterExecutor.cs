@@ -4,7 +4,7 @@ using System.Text;
 using HYDB.FilterEngine;
 using HYDB.Services.Models;
 
-namespace HYDB.Services.Services
+namespace HYDB.Services.Common.Services
 {
     public static class FilterExecutor
     {

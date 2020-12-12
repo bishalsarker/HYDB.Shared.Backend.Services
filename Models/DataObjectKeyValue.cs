@@ -6,9 +6,8 @@ namespace HYDB.Services.Models
 {
     public class DataObjectKeyValue
     {
-        public string Id { get; set; }
+        public string DataObjectId { get; set; }
         public string KeyString { get; set; }
         public string Value { get; set; }
-        public string DataObjectId { get; set; }
     }
 }

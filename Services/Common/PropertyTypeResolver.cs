@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HYDB.Services.Services
+namespace HYDB.Services.Common.Services
 {
     public class PropertyTypeResolver
     {

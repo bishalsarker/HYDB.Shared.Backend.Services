@@ -79,7 +79,7 @@ namespace HYDB.Services.Repositories
             }
         }
 
-        public ServiceOperation GetServiceOperationByName(string serviceName, string dataModelId)
+        public ServiceOperation GetServiceOperationByName(string serviceName, string serviceId)
         {
             using (IDbConnection conn = new SqlConnection(GetConnectionString()))
             {
@@ -87,17 +87,17 @@ namespace HYDB.Services.Repositories
                 return conn.Query<ServiceOperation>(sqlquery, new
                 {
                     @opname = serviceName,
-                    @serviceid = dataModelId
+                    @serviceid = serviceId
                 }).FirstOrDefault();
             }
         }
 
-        public List<ServiceOperation> GetServiceOperations(string dataModelId)
+        public List<ServiceOperation> GetServiceOperations(string serviceId)
         {
             using (IDbConnection conn = new SqlConnection(GetConnectionString()))
             {
                 string sqlquery = "select * from ServiceOperations where ServiceId=@serviceid ";
-                return conn.Query<ServiceOperation>(sqlquery, new { @serviceid = dataModelId }).ToList();
+                return conn.Query<ServiceOperation>(sqlquery, new { @serviceid = serviceId }).ToList();
             }
         }
     }

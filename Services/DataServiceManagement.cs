@@ -5,6 +5,7 @@ using HYDB.Services.Repositories;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -15,7 +16,7 @@ namespace HYDB.Services.Services
         private readonly DataServices _dataServiceRepo;
         private readonly ServiceOperations _serviceOperationRepo;
         private readonly UserAccounts _userAccountRepo;
-        // private readonly DataObjectKeyValueRepository _dataObjectKeyValueRepo;
+        private readonly DataObjectKeyValues _dataObjectKeyValueRepo;
         private readonly IMapper _mapper;
 
         public DataServiceManagement(IConfiguration config, IMapper mapper)
@@ -23,7 +24,7 @@ namespace HYDB.Services.Services
             _dataServiceRepo = new DataServices(config);
             _serviceOperationRepo = new ServiceOperations(config);
             _userAccountRepo = new UserAccounts(config);
-            // _dataObjectKeyValueRepo = new DataObjectKeyValueRepository();
+            _dataObjectKeyValueRepo = new DataObjectKeyValues(config);
             _mapper = mapper;
         }
 
@@ -33,7 +34,7 @@ namespace HYDB.Services.Services
 
             if (userModel != null)
             {
-                var matchedDataServices = _dataServiceRepo.GetAllDataServiceByName(newDataServiceRequest.Name, userModel.Id);
+                var matchedDataServices = _dataServiceRepo.GetDataServiceByName(newDataServiceRequest.Name, userModel.Id);
                 if (matchedDataServices != null)
                 {
                     return new Response()
@@ -156,7 +157,7 @@ namespace HYDB.Services.Services
             foreach (var operation in operations)
             {
                 _serviceOperationRepo.DeleteServiceOperation(operation.Id);
-                // _dataObjectKeyValueRepo.DeleteByKeyString(operation.Id);
+                _dataObjectKeyValueRepo.DeleteByKeyString(operation.Id);
             }
 
             _dataServiceRepo.DeleteDataService(dataServiceId);
@@ -251,13 +252,60 @@ namespace HYDB.Services.Services
         public Response DeleteOperation(string propId)
         {
             _serviceOperationRepo.DeleteServiceOperation(propId);
-            // _dataObjectKeyValueRepo.DeleteByKeyString(propId.ToString());
+            _dataObjectKeyValueRepo.DeleteByKeyString(propId.ToString());
 
             return new Response()
             {
                 IsSuccess = true,
                 Message = "Operation deleted"
             };
+        }
+
+        public ValidationResponse ValidateOperation(string opName, string serviceName, string userName, string httpMethod)
+        {
+            var validationResponse = new ValidationResponse()
+            {
+                HasError = true
+            };
+
+            var user = _userAccountRepo.GetByUsername(userName).FirstOrDefault();
+            if(user != null)
+            {
+                var service = _dataServiceRepo.GetDataServiceByName(serviceName, user.Id);
+                var operation = _serviceOperationRepo.GetServiceOperationByName(opName, service.Id);
+
+                if (service == null)
+                {
+                    validationResponse.Message = "Service couldn't be resolved";
+                }
+
+                if (operation == null)
+                {
+                    validationResponse.Message = "Operation couldn't be resolved";
+                }
+
+                if (service != null && operation != null)
+                {
+                    if (httpMethod == "POST" && operation.Type != "mutation")
+                    {
+                        validationResponse.Message = "Only mutations are allowed for POST request";
+                    }
+                    else if (httpMethod == "GET" && operation.Type != "query")
+                    {
+                        validationResponse.Message = "Only queries are allowed for GET request";
+                    }
+                    else
+                    {
+                        validationResponse.HasError = false;
+                    }
+                }
+            }
+            else
+            {
+                validationResponse.Message = "Something went wrong";
+            }
+
+            return validationResponse;
         }
     }
 }

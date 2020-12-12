@@ -18,11 +18,10 @@ namespace HYDB.Services.Repositories
         {
             using (IDbConnection conn = new SqlConnection(GetConnectionString()))
             {
-                string sqlquery = "insert into DataObjectKeyValues (Id, KeyString, Value, DataObjectId) " +
-                                  "values (@id, @keystring, @value, @objid)";
+                string sqlquery = "insert into DataObjectKeyValues (KeyString, Value, DataObjectId) " +
+                                  "values (@keystring, @value, @objid)";
                 conn.Execute(sqlquery, new
                 {
-                    @id=newDataObjectKeyValue.Id,
                     @keystring = newDataObjectKeyValue.KeyString,
                     @value = newDataObjectKeyValue.Value,
                     @objid = newDataObjectKeyValue.DataObjectId

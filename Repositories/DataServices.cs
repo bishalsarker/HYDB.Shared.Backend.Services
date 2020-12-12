@@ -49,7 +49,7 @@ namespace HYDB.Services.Repositories
             }
         }
 
-        public DataService GetAllDataServiceByName(string modelName, string userId)
+        public DataService GetDataServiceByName(string modelName, string userId)
         {
             using (IDbConnection conn = new SqlConnection(GetConnectionString()))
             {
