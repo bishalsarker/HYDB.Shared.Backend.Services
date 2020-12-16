@@ -30,10 +30,13 @@ namespace HYDB.Services.Common.Services
 
             foreach (var obj in dataObjKeyValues)
             {
-                var prop = dataModelProps.Find(x => x.Id.ToString() == obj.KeyString);
+                var prop = dataModelProps.Find(x => x.Id == obj.KeyString);
                 if (prop != null)
                 {
-                    dict.Add(prop.Name, Convert.ChangeType(obj.Value, PropertyTypeResolver.Resolve(prop.Type)));
+                    if (!string.IsNullOrWhiteSpace(obj.Value)) 
+                    {
+                        dict.Add(prop.Name, Convert.ChangeType(obj.Value, PropertyTypeResolver.Resolve(prop.Type)));
+                    }
                 }
             }
 
@@ -89,7 +92,7 @@ namespace HYDB.Services.Common.Services
                             {
                                 Name = variable.Name,
                                 Value = 0,
-                                Type = typeof(int)
+                                Type = typeof(double)
                             });
                         }
                     }

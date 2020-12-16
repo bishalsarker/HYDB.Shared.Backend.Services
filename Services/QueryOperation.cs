@@ -52,7 +52,11 @@ namespace HYDB.Services.Services
 
                 if (operation != null)
                 {
-                    return Execute(JsonConvert.DeserializeObject<QueryModel>(operation.Script), user.Id, parsedObject);
+                    var script = JsonConvert.DeserializeObject<QueryScript>(operation.Script, new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+                    return Execute(script, user.Id, parsedObject);
                 }
                 else
                 {
@@ -88,7 +92,7 @@ namespace HYDB.Services.Services
             }
         }
 
-        private Response Execute(QueryModel query, string userId, object args)
+        private Response Execute(QueryScript query, string userId, object args)
         {
             var queryResult = new Response() { Data = new List<object>() };
             var dataModel = _dataModelRepository.GetAllDataModelByName(query.DataSource, userId);
@@ -133,10 +137,10 @@ namespace HYDB.Services.Services
             }
         }
 
-        private List<DataModelProperty> GetSelectedProperties(QueryModel query, List<DataModelProperty> allProperties)
+        private List<DataModelProperty> GetSelectedProperties(QueryScript query, List<DataModelProperty> allProperties)
         {
             var selectedProps = new List<DataModelProperty>();
-            if (query.Fields.Length > 0)
+            if (query.Fields != null && query.Fields.Length > 0)
             {
                 foreach (var field in query.Fields)
                 {
@@ -178,10 +182,10 @@ namespace HYDB.Services.Services
                     type = typeof(string);
                     break;
                 case JTokenType.Integer:
-                    type = typeof(int);
+                    type = typeof(double);
                     break;
                 case JTokenType.Float:
-                    type = typeof(float);
+                    type = typeof(double);
                     break;
                 case JTokenType.Boolean:
                     type = typeof(bool);
@@ -292,7 +296,14 @@ namespace HYDB.Services.Services
                 var prop = propList.Find(x => x.Id == keyval.KeyString);
                 if (prop != null)
                 {
-                    obj.Add(prop.Name, keyval.Value);
+                    if (!string.IsNullOrWhiteSpace(keyval.Value))
+                    {
+                        obj.Add(prop.Name, Convert.ChangeType(keyval.Value, PropertyTypeResolver.Resolve(prop.Type)));
+                    }
+                    else
+                    {
+                        obj.Add(prop.Name, null);
+                    }
                 }
             }
             dynamic parsedObject = obj;

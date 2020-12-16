@@ -85,7 +85,10 @@ namespace HYDB.Services.Services
                     var prop = _dataModelPropertyRepo.GetDataModelPropertyById(key.KeyString);
                     if (prop != null)
                     {
-                        _dataObjectKeyValRepo.UpdateValue(objId, prop.Id, dataObject[prop.Name].ToString());
+                        if(dataObject.ContainsKey(prop.Name))
+                        {
+                            _dataObjectKeyValRepo.UpdateValue(objId, prop.Id, dataObject[prop.Name].ToString());
+                        }
                     }
                 }
             }

@@ -1,4 +1,5 @@
 ﻿using HYDB.Services.DTO;
+using Microsoft.Extensions.Primitives;
 using System.Collections.Generic;
 
 namespace HYDB.Services.Services
@@ -14,5 +15,6 @@ namespace HYDB.Services.Services
         DataServiceResponse GetDataService(string modelId);
         ServiceOperationResponse GetOperation(string operationId);
         Response RenameDataService(DataServicePayload newDataServiceRequest);
+        Response UpdateScript(ServiceOperationPayload updateProperty, string userName);
     }
 }

@@ -14,7 +14,7 @@ namespace HYDB.Services.Common.Services
                     break;
 
                 case "number":
-                    type = typeof(int);
+                    type = typeof(double);
                     break;
 
                 default:

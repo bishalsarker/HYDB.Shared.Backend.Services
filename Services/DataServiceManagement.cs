@@ -3,6 +3,7 @@ using HYDB.Services.DTO;
 using HYDB.Services.Models;
 using HYDB.Services.Repositories;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,6 +16,7 @@ namespace HYDB.Services.Services
     {
         private readonly DataServices _dataServiceRepo;
         private readonly ServiceOperations _serviceOperationRepo;
+        private readonly DataModels _dataModelRepo;
         private readonly UserAccounts _userAccountRepo;
         private readonly DataObjectKeyValues _dataObjectKeyValueRepo;
         private readonly IMapper _mapper;
@@ -25,6 +27,7 @@ namespace HYDB.Services.Services
             _serviceOperationRepo = new ServiceOperations(config);
             _userAccountRepo = new UserAccounts(config);
             _dataObjectKeyValueRepo = new DataObjectKeyValues(config);
+            _dataModelRepo = new DataModels(config);
             _mapper = mapper;
         }
 
@@ -226,6 +229,52 @@ namespace HYDB.Services.Services
             {
                 response.IsSuccess = false;
                 response.Message = "Operation can't be updated";
+            }
+
+            return response;
+        }
+
+        public Response UpdateScript(ServiceOperationPayload updateOperationRequest, string userName)
+        {
+            var updatedOperation = _mapper.Map<ServiceOperation>(updateOperationRequest);
+            var response = new Response();
+
+            if (_serviceOperationRepo.GetServiceOperationById(updatedOperation.Id) != null)
+            {
+                try
+                {
+                    var script = JsonConvert.DeserializeObject<QueryScript>(updatedOperation.Script, new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+
+                    var dataSource = (script != null) ? script.DataSource : "";
+                    var user = _userAccountRepo.GetByUsername(userName).FirstOrDefault();
+                    var model = _dataModelRepo.GetAllDataModelByName(dataSource, user.Id);
+
+                    if (model != null)
+                    {
+                        _serviceOperationRepo.UpdateServiceOperationScript(updatedOperation);
+                        response.IsSuccess = true;
+                        response.Data = updatedOperation;
+                        response.Message = "Script updated successfully";
+                    }
+                    else
+                    {
+                        response.IsSuccess = false;
+                        response.Message = "Data source can't be resolved";
+                    }
+                }
+                catch (Exception e)
+                {
+                    response.IsSuccess = false;
+                    response.Message = "Invalid query model";
+                }
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = "Script can't be updated";
             }
 
             return response;

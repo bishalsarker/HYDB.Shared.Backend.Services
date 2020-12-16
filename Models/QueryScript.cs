@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HYDB.Services.Models
 {
-    public class QueryModel
+    public class QueryScript
     {
         public string DataSource { get; set; }
         public string[] Fields { get; set; }

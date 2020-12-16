@@ -46,6 +46,19 @@ namespace HYDB.Services.Repositories
             }
         }
 
+        public void UpdateServiceOperationScript(ServiceOperation updateProperty)
+        {
+            using (IDbConnection conn = new SqlConnection(GetConnectionString()))
+            {
+                string sqlquery = "update ServiceOperations set Script=@script where Id=@opid";
+                conn.Execute(sqlquery, new
+                {
+                    @opid = updateProperty.Id,
+                    @script = updateProperty.Script
+                });
+            }
+        }
+
         public ServiceOperation EditServiceOperationScript(ServiceOperation updateProperty)
         {
             using (IDbConnection conn = new SqlConnection(GetConnectionString()))
