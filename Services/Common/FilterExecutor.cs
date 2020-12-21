@@ -76,7 +76,7 @@ namespace HYDB.Services.Common.Services
                 {
                     if (variable.Name != "const")
                     {
-                        var value = GetValueFromDictionary(variable.Name, valueDictionary);
+                        var value = (object)GetValueFromDictionary(variable.Name, valueDictionary);
                         if (value != null)
                         {
                             resolvedVaribale.Add(new Variable()

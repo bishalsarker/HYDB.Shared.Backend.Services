@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 
 namespace HYDB.Services.Services
 {
@@ -37,18 +38,13 @@ namespace HYDB.Services.Services
             _mapper = mapper;
         }
 
-        public Response Query(string opName, string serviceName, string userName, string args)
+        public Response Query(string opName, string serviceName, string userName, ExpandoObject args)
         {
             var user = _userAccountsRepo.GetByUsername(userName).FirstOrDefault();
 
             if(user != null)
             {
                 var operation = ResolveOperation(opName, serviceName, user.Id);
-                object parsedObject = null;
-                if (args != null)
-                {
-                    parsedObject = ParseJsonToObject(args);
-                }
 
                 if (operation != null)
                 {
@@ -56,7 +52,7 @@ namespace HYDB.Services.Services
                     {
                         NullValueHandling = NullValueHandling.Ignore
                     });
-                    return Execute(script, user.Id, parsedObject);
+                    return Execute(script, user.Id, GetArgDictionary(args));
                 }
                 else
                 {
@@ -153,6 +149,38 @@ namespace HYDB.Services.Services
             }
 
             return selectedProps;
+        }
+
+        private IDictionary<string, object> GetArgDictionary(ExpandoObject args)
+        {
+            IDictionary<string, object> argDict = new Dictionary<string, object>();
+
+            if(args != null)
+            {
+                IDictionary<string, dynamic> argObject = args;
+                foreach (var key in argObject.Keys)
+                {
+                    argDict.Add(key, GetValueFromJsonElement(argObject[key]));
+                }
+            }
+
+            return argDict;
+        }
+
+        private dynamic GetValueFromJsonElement(JsonElement value)
+        {
+            dynamic parsedValue = null;
+            switch (value.ValueKind)
+            {
+                case JsonValueKind.String:
+                    parsedValue = value.GetString();
+                    break;
+                case JsonValueKind.Number:
+                    parsedValue = value.GetDouble();
+                    break;
+            }
+
+            return parsedValue;
         }
 
         public object ParseJsonToObject(string jsonString)

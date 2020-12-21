@@ -310,51 +310,53 @@ namespace HYDB.Services.Services
             };
         }
 
-        public ValidationResponse ValidateOperation(string opName, string serviceName, string userName, string httpMethod)
+        public DataModel GetDataModelFromOperationDataSource(ServiceOperation operation, string userName)
+        {
+            DataModel datamodel = null;
+            if(operation != null)
+            {
+                var script = JsonConvert.DeserializeObject<QueryScript>(operation.Script, new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+                var user = _userAccountRepo.GetByUsername(userName).FirstOrDefault();
+
+                if (script != null && user != null)
+                {
+                    datamodel = _dataModelRepo.GetAllDataModelByName(script.DataSource, user.Id);
+                }
+            }
+
+            return datamodel;
+        }
+
+        public ValidationResponse ValidateOperation(string opName, string serviceName, string userName)
         {
             var validationResponse = new ValidationResponse()
             {
-                HasError = true
+                HasError = false
             };
 
-            var user = _userAccountRepo.GetByUsername(userName).FirstOrDefault();
-            if(user != null)
+            if (GetOperationByOpeartionName(opName, serviceName, userName) == null)
             {
-                var service = _dataServiceRepo.GetDataServiceByName(serviceName, user.Id);
-                var operation = _serviceOperationRepo.GetServiceOperationByName(opName, service.Id);
-
-                if (service == null)
-                {
-                    validationResponse.Message = "Service couldn't be resolved";
-                }
-
-                if (operation == null)
-                {
-                    validationResponse.Message = "Operation couldn't be resolved";
-                }
-
-                if (service != null && operation != null)
-                {
-                    if (httpMethod == "POST" && operation.Type != "mutation")
-                    {
-                        validationResponse.Message = "Only mutations are allowed for POST request";
-                    }
-                    else if (httpMethod == "GET" && operation.Type != "query")
-                    {
-                        validationResponse.Message = "Only queries are allowed for GET request";
-                    }
-                    else
-                    {
-                        validationResponse.HasError = false;
-                    }
-                }
-            }
-            else
-            {
-                validationResponse.Message = "Something went wrong";
+                validationResponse.HasError = true;
+                validationResponse.Message = "Operation couldn't be resolved";
             }
 
             return validationResponse;
+        }
+
+        public ServiceOperation GetOperationByOpeartionName(string opName, string serviceName, string userName)
+        {
+            var user = _userAccountRepo.GetByUsername(userName).FirstOrDefault();
+
+            if (user == null)
+            {
+                user = new UserAccount();
+            }
+
+            var service = (user != null) ? _dataServiceRepo.GetDataServiceByName(serviceName, user.Id) : new DataService();
+            return _serviceOperationRepo.GetServiceOperationByName(opName, service.Id);
         }
     }
 }
