@@ -32,6 +32,15 @@ namespace HYDB.Services.Repositories
             }
         }
 
+        public IEnumerable<UserAccount> GetById(string userId)
+        {
+            string sql = "select * from UserAccounts where Ide=@id";
+            using (IDbConnection conn = new SqlConnection(GetConnectionString()))
+            {
+                return conn.Query<UserAccount>(sql, new { @id = userId });
+            }
+        }
+
         public void AddUser(UserAccount userAccount)
         {
             string sql = "insert into UserAccounts(Id, UserName, Email, Password, IsEmailVerified, IsActive, CreationDate) " +
