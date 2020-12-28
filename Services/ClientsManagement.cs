@@ -23,21 +23,56 @@ namespace HYDB.Services.Services
             _mapper = mapper;
         }
 
+        public Response GetAllClients(string userName)
+        {
+            var clients = new List<ClientResponse>();
+            var user = _userAccounts.GetByUsername(userName).FirstOrDefault();
+            if(user != null)
+            {
+                foreach(var client in _clientsRepo.GetAllClients(user.Id))
+                {
+                    clients.Add(_mapper.Map<ClientResponse>(client));
+                }
+            }
+
+            return new Response()
+            {
+                IsSuccess = true,
+                Data = clients
+            };
+            
+        }
+
         public Response AddNewClient(ClientPayload newClient, string userName)
         {
             var user = _userAccounts.GetByUsername(userName).FirstOrDefault();
 
             if(user != null)
             {
-                var client = _mapper.Map<Client>(newClient);
-                client.Id = Guid.NewGuid().ToString("N").ToUpper();
-                client.CreatedBy = user.Id;
-                _clientsRepo.AddNewClient(client);
-
-                return new Response()
+                var matchedClient = _clientsRepo.GetByName(newClient.Name);
+                if(matchedClient != null)
                 {
-                    IsSuccess = true
-                };
+                    return new Response()
+                    {
+                        IsSuccess = false,
+                        Message = "Client already exists with this name"
+                    };
+                }
+                else
+                {
+                    var client = _mapper.Map<Client>(newClient);
+                    client.Id = Guid.NewGuid().ToString("N").ToUpper();
+                    client.ApiKey = Guid.NewGuid().ToString("N").ToLower();
+                    client.CreatedBy = user.Id;
+                    _clientsRepo.AddNewClient(client);
+
+                    return new Response()
+                    {
+                        IsSuccess = true,
+                        Message = "Client added successfully",
+                        Data = client
+                    };
+                }
             }
             else
             {

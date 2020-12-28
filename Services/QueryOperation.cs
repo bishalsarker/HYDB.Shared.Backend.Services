@@ -38,37 +38,24 @@ namespace HYDB.Services.Services
             _mapper = mapper;
         }
 
-        public Response Query(string opName, string serviceName, string userName, ExpandoObject args)
+        public Response Query(string opName, string serviceName, string userId, ExpandoObject args)
         {
-            var user = _userAccountsRepo.GetByUsername(userName).FirstOrDefault();
+            var operation = ResolveOperation(opName, serviceName, userId);
 
-            if(user != null)
+            if (operation != null)
             {
-                var operation = ResolveOperation(opName, serviceName, user.Id);
-
-                if (operation != null)
+                var script = JsonConvert.DeserializeObject<QueryScript>(operation.Script, new JsonSerializerSettings
                 {
-                    var script = JsonConvert.DeserializeObject<QueryScript>(operation.Script, new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore
-                    });
-                    return Execute(script, user.Id, GetArgDictionary(args));
-                }
-                else
-                {
-                    return new Response()
-                    {
-                        IsSuccess = false,
-                        Message = "Operation couldn't be resolved",
-                    };
-                }
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+                return Execute(script, userId, GetArgDictionary(args));
             }
             else
             {
                 return new Response()
                 {
                     IsSuccess = false,
-                    Message = "Something went wrong"
+                    Message = "Operation couldn't be resolved",
                 };
             }
         }

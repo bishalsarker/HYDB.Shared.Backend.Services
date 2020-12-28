@@ -12,6 +12,7 @@ namespace HYDB.Services.MapperProfiles
         public ClientMap()
         {
             CreateMap<ClientPayload, Client>();
+            CreateMap<Client, ClientResponse>();
         }
     }
 }

@@ -19,6 +19,7 @@ namespace HYDB.Services.Services
         private readonly DataModels _dataModelRepo;
         private readonly UserAccounts _userAccountRepo;
         private readonly DataObjectKeyValues _dataObjectKeyValueRepo;
+        private readonly Clients _clientsRepo;
         private readonly IMapper _mapper;
 
         public DataServiceManagement(IConfiguration config, IMapper mapper)
@@ -28,6 +29,7 @@ namespace HYDB.Services.Services
             _userAccountRepo = new UserAccounts(config);
             _dataObjectKeyValueRepo = new DataObjectKeyValues(config);
             _dataModelRepo = new DataModels(config);
+            _clientsRepo = new Clients(config);
             _mapper = mapper;
         }
 
@@ -310,7 +312,7 @@ namespace HYDB.Services.Services
             };
         }
 
-        public DataModel GetDataModelFromOperationDataSource(ServiceOperation operation, string userName)
+        public DataModel GetDataModelFromOperationDataSource(ServiceOperation operation, string userId)
         {
             DataModel datamodel = null;
             if(operation != null)
@@ -319,25 +321,35 @@ namespace HYDB.Services.Services
                 {
                     NullValueHandling = NullValueHandling.Ignore
                 });
-                var user = _userAccountRepo.GetByUsername(userName).FirstOrDefault();
 
-                if (script != null && user != null)
+                if (script != null)
                 {
-                    datamodel = _dataModelRepo.GetAllDataModelByName(script.DataSource, user.Id);
+                    datamodel = _dataModelRepo.GetAllDataModelByName(script.DataSource, userId);
                 }
             }
 
             return datamodel;
         }
 
-        public ValidationResponse ValidateOperation(string opName, string serviceName, string userName)
+        public Client GetClientFromRequest(string apiKey)
+        {
+            Client client = null;
+            if(apiKey != null)
+            {
+                client = _clientsRepo.GetByApiKey(apiKey);
+            }
+
+            return client;
+        }
+
+        public ValidationResponse ValidateOperation(string opName, string serviceName, string userId)
         {
             var validationResponse = new ValidationResponse()
             {
                 HasError = false
             };
 
-            if (GetOperationByOpeartionName(opName, serviceName, userName) == null)
+            if (GetOperationByOpeartionName(opName, serviceName, userId) == null)
             {
                 validationResponse.HasError = true;
                 validationResponse.Message = "Operation couldn't be resolved";
@@ -346,17 +358,16 @@ namespace HYDB.Services.Services
             return validationResponse;
         }
 
-        public ServiceOperation GetOperationByOpeartionName(string opName, string serviceName, string userName)
+        public ServiceOperation GetOperationByOpeartionName(string opName, string serviceName, string userId)
         {
-            var user = _userAccountRepo.GetByUsername(userName).FirstOrDefault();
-
-            if (user == null)
+            ServiceOperation operation = null;
+            var service = _dataServiceRepo.GetDataServiceByName(serviceName, userId);
+            if(service != null)
             {
-                user = new UserAccount();
+                operation = _serviceOperationRepo.GetServiceOperationByName(opName, service.Id);
             }
 
-            var service = (user != null) ? _dataServiceRepo.GetDataServiceByName(serviceName, user.Id) : new DataService();
-            return _serviceOperationRepo.GetServiceOperationByName(opName, service.Id);
+            return operation;
         }
     }
 }

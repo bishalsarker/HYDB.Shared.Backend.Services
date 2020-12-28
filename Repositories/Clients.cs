@@ -28,6 +28,30 @@ namespace HYDB.Services.Repositories
             }
         }
 
+        public IEnumerable<Client> GetAllClients(string userId)
+        {
+            using (IDbConnection conn = new SqlConnection(GetConnectionString()))
+            {
+                string sqlquery = "select * from Clients where CreatedBy=@userid";
+                return conn.Query<Client>(sqlquery, new
+                {
+                    @userid = userId
+                });
+            }
+        }
+
+        public Client GetByName(string name)
+        {
+            using (IDbConnection conn = new SqlConnection(GetConnectionString()))
+            {
+                string sqlquery = "select * from Clients where Name=@name";
+                return conn.Query<Client>(sqlquery, new
+                {
+                    @name = name
+                }).FirstOrDefault();
+            }
+        }
+
         public Client GetByApiKey(string apiKey)
         {
             using (IDbConnection conn = new SqlConnection(GetConnectionString()))
