@@ -63,5 +63,14 @@ namespace HYDB.Services.Repositories
                 }).FirstOrDefault();
             }
         }
+
+        public void DeleteClient(string Id)
+        {
+            using (IDbConnection conn = new SqlConnection(GetConnectionString()))
+            {
+                string sqlquery = "delete from Clients where Id=@id";
+                conn.Execute(sqlquery, new { @id = Id });
+            }
+        }
     }
 }

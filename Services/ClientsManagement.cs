@@ -3,6 +3,7 @@ using HYDB.Services.DTO;
 using HYDB.Services.Models;
 using HYDB.Services.Repositories;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,6 +83,16 @@ namespace HYDB.Services.Services
                     Message = "User can't be resolved"
                 };
             }
+        }
+
+        public Response DeleteClient(string clientId)
+        {
+            _clientsRepo.DeleteClient(clientId);
+            return new Response()
+            {
+                IsSuccess = false,
+                Message = "Client deleted"
+            };
         }
 
         public UserAccount GetUserFromApiKey(string apiKey)
