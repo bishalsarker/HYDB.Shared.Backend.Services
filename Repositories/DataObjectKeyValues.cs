@@ -68,7 +68,7 @@ namespace HYDB.Services.Repositories
             }
         }
 
-        public List<DataObjectKeyValue> GetDataObjectValues(string dataObjectId)
+        public IEnumerable<DataObjectKeyValue> GetDataObjectValues(string dataObjectId)
         {
             using (IDbConnection conn = new SqlConnection(GetConnectionString()))
             {

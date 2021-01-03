@@ -62,11 +62,11 @@ namespace HYDB.Services.Repositories
             }
         }
 
-        public List<DataObject> GetAllDataObject(string refId)
+        public IEnumerable<DataObject> GetAllDataObject(string refId)
         {
             using (IDbConnection conn = new SqlConnection(GetConnectionString()))
             {
-                string sqlquery = "select * from DataObject where ReferenceId=@refid";
+                string sqlquery = "select Id from DataObject where ReferenceId=@refid";
                 return conn.Query<DataObject>(sqlquery, new
                 {
                     @refid = refId

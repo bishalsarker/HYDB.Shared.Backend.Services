@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using HYDB.FilterEngine;
 using HYDB.Services.Models;
 
@@ -9,19 +9,19 @@ namespace HYDB.Services.Common.Services
     public static class FilterExecutor
     {
         public static bool Execute(string expression,
-                                   string dataObjectId,
-                                   List<DataObjectKeyValue> dataObjKeyValues,
-                                   List<DataModelProperty> dataModelProps,
+                                   DataObject dataObject,
+                                   IEnumerable<DataObjectKeyValue> dataObjKeyValues,
+                                   IEnumerable<DataModelProperty> dataModelProps,
                                    dynamic args)
         {
-            var valueDict = BuildValueDictionary(dataObjectId, dataObjKeyValues, dataModelProps, args);
+            var valueDict = BuildValueDictionary(dataObject.Id, dataObjKeyValues, dataModelProps, args);
             List<Clause> clauseList = ParseFilterExpression(expression, valueDict);
             return Interpreter.Execute(clauseList);
         }
 
         private static Dictionary<string, dynamic> BuildValueDictionary(string dataObjectId,
-                                                                        List<DataObjectKeyValue> dataObjKeyValues,
-                                                                        List<DataModelProperty> dataModelProps,
+                                                                        IEnumerable<DataObjectKeyValue> dataObjKeyValues,
+                                                                        IEnumerable<DataModelProperty> dataModelProps,
                                                                         dynamic args)
         {
             var dict = new Dictionary<string, dynamic>();
@@ -30,7 +30,7 @@ namespace HYDB.Services.Common.Services
 
             foreach (var obj in dataObjKeyValues)
             {
-                var prop = dataModelProps.Find(x => x.Id == obj.KeyString);
+                var prop = dataModelProps.ToList().Find(x => x.Id == obj.KeyString);
                 if (prop != null)
                 {
                     if (!string.IsNullOrWhiteSpace(obj.Value)) 

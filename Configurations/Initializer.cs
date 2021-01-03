@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
+using HYDB.Services.Interfaces;
 using HYDB.Services.MapperProfiles;
 using HYDB.Services.Services;
+using HYDB.Services.Services.Operations;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace HYDB.Services.Configurations
 {
@@ -14,9 +13,11 @@ namespace HYDB.Services.Configurations
         {
             services.AddAutoMapper(typeof(UserAccountMap), typeof(DataModelMap));
 
-            services.AddSingleton<IUserAccountInfo, UserAccountInfo>();
-            services.AddSingleton<IDataModelManagement, DataModelManagement>();
-            services.AddSingleton<IDataServiceManagement, DataServiceManagement>();
+            services.AddScoped<IUserAccountInfo, UserAccountInfo>();
+            services.AddScoped<IDataModelManagement, DataModelManagement>();
+            services.AddScoped<IDataServiceManagement, DataServiceManagement>();
+            services.AddScoped<IOperationFactory, OperationFactory>();
+            services.AddScoped<IOperationsManagement, OperationsManagement>();
         }
     }
 }

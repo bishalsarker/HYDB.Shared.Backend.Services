@@ -21,4 +21,8 @@
     <ProjectReference Include="..\HYDB.FilterEngine\HYDB.FilterEngine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Enums\" />
+  </ItemGroup>
+
 </Project>

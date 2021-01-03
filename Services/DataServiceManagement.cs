@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -178,7 +177,7 @@ namespace HYDB.Services.Services
         {
             var newOperation = _mapper.Map<ServiceOperation>(newOperationRequest);
             newOperation.Id = Guid.NewGuid().ToString("N").ToUpper();
-            newOperation.Script = GenerateNewScript();
+            newOperation.Script = GenerateNewScript(newOperationRequest.Type);
 
             var matchedOperation = _serviceOperationRepo.GetServiceOperationByName(newOperation.Name, newOperation.ServiceId);
 
@@ -202,14 +201,32 @@ namespace HYDB.Services.Services
             }
         }
 
-        private string GenerateNewScript()
+        private string GenerateNewScript(string opType)
         {
             var script = new StringBuilder();
             script.Append("{");
             script.Append(Environment.NewLine);
             script.Append("\t");
+
             script.Append("\"dataSource\": \"\"");
             script.Append(Environment.NewLine);
+
+            if (opType == "query")
+            {
+                script.Append("\"fields\": \"\"");
+                script.Append(Environment.NewLine);
+                script.Append("\"filter\": \"\"");
+                script.Append(Environment.NewLine);
+            }
+
+            if (opType == "mutation")
+            {
+                script.Append("\"mutationType\": \"\"");
+                script.Append(Environment.NewLine);
+                script.Append("\"condition\": \"\"");
+                script.Append(Environment.NewLine);
+            }
+
             script.Append("}");
 
             return script.ToString();
@@ -310,64 +327,6 @@ namespace HYDB.Services.Services
                 IsSuccess = true,
                 Message = "Operation deleted"
             };
-        }
-
-        public DataModel GetDataModelFromOperationDataSource(ServiceOperation operation, string userId)
-        {
-            DataModel datamodel = null;
-            if(operation != null)
-            {
-                var script = JsonConvert.DeserializeObject<QueryScript>(operation.Script, new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore
-                });
-
-                if (script != null)
-                {
-                    datamodel = _dataModelRepo.GetAllDataModelByName(script.DataSource, userId);
-                }
-            }
-
-            return datamodel;
-        }
-
-        public Client GetClientFromRequest(string apiKey)
-        {
-            Client client = null;
-            if(apiKey != null)
-            {
-                client = _clientsRepo.GetByApiKey(apiKey);
-            }
-
-            return client;
-        }
-
-        public ValidationResponse ValidateOperation(string opName, string serviceName, string userId)
-        {
-            var validationResponse = new ValidationResponse()
-            {
-                HasError = false
-            };
-
-            if (GetOperationByOpeartionName(opName, serviceName, userId) == null)
-            {
-                validationResponse.HasError = true;
-                validationResponse.Message = "Operation couldn't be resolved";
-            }
-
-            return validationResponse;
-        }
-
-        public ServiceOperation GetOperationByOpeartionName(string opName, string serviceName, string userId)
-        {
-            ServiceOperation operation = null;
-            var service = _dataServiceRepo.GetDataServiceByName(serviceName, userId);
-            if(service != null)
-            {
-                operation = _serviceOperationRepo.GetServiceOperationByName(opName, service.Id);
-            }
-
-            return operation;
         }
     }
 }
