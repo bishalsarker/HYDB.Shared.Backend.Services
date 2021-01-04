@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace HYDB.Services.Services.Operations
 {
-    internal class UpdateOperation : BaseMutationOperation
+    internal class UpdateOperation : BaseOperation
     {
         private readonly DataObjectKeyValues _dataObjectKeyValRepo;
         private readonly DataModelProperties _dataModelPropertyRepo;
@@ -28,10 +28,14 @@ namespace HYDB.Services.Services.Operations
 
         public override void OnOperationExecution(QueryScript script, IDictionary<string, object> args, IDictionary<string, object> model, string userId)
         {
-            UpdateDataObject(_dataObjectResolver.ResolveObjects(DataModel, new ConditionalExpression() {
-                Expression = script.Condition,
-                Args = args
-            }, true), model);
+            if (!string.IsNullOrEmpty(script.Filter))
+            {
+                UpdateDataObject(_dataObjectResolver.ResolveObjects(DataModel, new ConditionalExpression()
+                {
+                    Expression = script.Condition,
+                    Args = args
+                }, true), model);
+            }
         }
 
         private void UpdateDataObject(IEnumerable<DataObject> dataObjects, IDictionary<string, object> newDataObject)

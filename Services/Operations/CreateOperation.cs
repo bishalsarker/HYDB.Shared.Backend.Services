@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace HYDB.Services.Services.Operations
 {
-    internal class CreateOperation : BaseMutationOperation
+    internal class CreateOperation : BaseOperation
     {
         private readonly DataObjects _dataObjRepo;
         private readonly DataObjectKeyValues _dataObjectKeyValRepo;
@@ -37,12 +37,14 @@ namespace HYDB.Services.Services.Operations
 
             _dataObjRepo.AddNewDataObject(newDataObj);
 
-            foreach (var key in newDataObject.Keys)
+            var properties = _dataModelPropertyRepo.GetDataModelProperties(dataModelId);
+
+            foreach (var prop in properties)
             {
                 _dataObjectKeyValRepo.AddNewDataObjectKeyValue(new DataObjectKeyValue()
                 {
-                    KeyString = _dataModelPropertyRepo.GetDataModelPropertyByName(key, dataModelId).Id,
-                    Value = newDataObject[key].ToString(),
+                    KeyString = prop.Id,
+                    Value = newDataObject.ContainsKey(prop.Name) ? newDataObject[prop.Name].ToString() : "",
                     DataObjectId = newDataObj.Id
                 });
             }

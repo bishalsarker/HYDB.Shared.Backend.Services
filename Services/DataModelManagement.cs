@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace HYDB.Services.Services
 {
@@ -15,6 +14,7 @@ namespace HYDB.Services.Services
         private readonly DataModels _dataModelRepo;
         private readonly DataModelProperties _dataModelPropRepo;
         private readonly UserAccounts _userAccountRepo;
+        private readonly DataObjects _dataObjectRepo;
         private readonly DataObjectKeyValues _dataObjectKeyValueRepo;
         private readonly IMapper _mapper;
 
@@ -23,6 +23,7 @@ namespace HYDB.Services.Services
             _dataModelRepo = new DataModels(config);
             _dataModelPropRepo = new DataModelProperties(config);
             _userAccountRepo = new UserAccounts(config);
+            _dataObjectRepo = new DataObjects(config);
             _dataObjectKeyValueRepo = new DataObjectKeyValues(config);
             _mapper = mapper;
         }
@@ -156,7 +157,7 @@ namespace HYDB.Services.Services
             foreach (var property in properties)
             {
                 _dataModelPropRepo.DeleteDataModelProperty(property.Id);
-                // _dataObjectKeyValueRepo.DeleteByKeyString(property.Id);
+                _dataObjectKeyValueRepo.DeleteByKeyString(property.Id);
             }
 
             _dataModelRepo.DeleteDataModel(modelId);
@@ -186,6 +187,19 @@ namespace HYDB.Services.Services
             else
             {
                 _dataModelPropRepo.AddNewDataModelProperty(newDataModelProp);
+
+                var savedObjects = _dataObjectRepo.GetAllDataObject(newDataModelProp.DataModelId);
+
+                foreach(var obj in savedObjects)
+                {
+                    _dataObjectKeyValueRepo.AddNewDataObjectKeyValue(new DataObjectKeyValue()
+                    {
+                        KeyString = newDataModelProp.Id,
+                        Value = "",
+                        DataObjectId = obj.Id
+                    });
+                }
+
                 return new Response()
                 {
                     IsSuccess = true,
@@ -237,7 +251,7 @@ namespace HYDB.Services.Services
         public Response DeleteProperty(string propId)
         {
             _dataModelPropRepo.DeleteDataModelProperty(propId);
-            // _dataObjectKeyValueRepo.DeleteByKeyString(propId.ToString());
+            _dataObjectKeyValueRepo.DeleteByKeyString(propId);
 
             return new Response()
             {

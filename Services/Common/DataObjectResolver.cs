@@ -30,18 +30,15 @@ namespace HYDB.Services.Services.Common
             {
                 if (applyFilter)
                 {
-                    bool matches = false;
-                    if (!string.IsNullOrEmpty(condition.Expression))
-                    {
-                        matches = FilterExecutor.Execute(
+                    bool matches = FilterExecutor.Execute(
                         condition.Expression,
                         obj,
                         _dataObjectKeyValRepo.GetDataObjectValues(obj.Id),
                         dataModelProps,
-                        GetArgDictionary(condition.Args));
-                    }
+                        GetArgDictionary(condition.Args)
+                    );
 
-                    if(matches)
+                    if (matches)
                     {
                         resolvedObjects.Add(obj);
                     }

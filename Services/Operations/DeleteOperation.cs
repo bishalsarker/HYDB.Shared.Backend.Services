@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace HYDB.Services.Services.Operations
 {
-    internal class DeleteOperation : BaseMutationOperation
+    internal class DeleteOperation : BaseOperation
     {
         private readonly DataObjects _dataObjRepo;
         private readonly DataObjectKeyValues _dataObjectKeyValRepo;
@@ -28,11 +28,14 @@ namespace HYDB.Services.Services.Operations
 
         public override void OnOperationExecution(QueryScript script, IDictionary<string, object> args, IDictionary<string, object> model, string userId)
         {
-            DeleteDataObject(_dataObjectResolver.ResolveObjects(DataModel, new ConditionalExpression()
+            if(!string.IsNullOrEmpty(script.Filter))
             {
-                Expression = script.Condition,
-                Args = args
-            }, true));
+                DeleteDataObject(_dataObjectResolver.ResolveObjects(DataModel, new ConditionalExpression()
+                {
+                    Expression = script.Condition,
+                    Args = args
+                }, true));
+            }
         }
 
         private void DeleteDataObject(IEnumerable<DataObject> dataObjects)
